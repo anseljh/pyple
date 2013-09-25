@@ -45,7 +45,7 @@ v0.0.1  PyPLE was born in a flash of inspiration at L & L Hawaiian Barbecue in
 v0.1.0  Port to SQLObject for database persistence begun - 1/22/07
 v0.2.0  Complete rewrite of SQLObject version
 v0.3.0  Another major rewrite -- simplifying Operator, parameters, etc. 3/15/07.  It works! :)
-v0.3.1  Renamed Regex -> RegexOp for IPLC compatibility; other people might that problem too.
+v0.3.1  Renamed Regex -> RegexOp for IPLC compatibility; other people might have that problem too.
         Added regex cache.
 """
 
@@ -55,9 +55,7 @@ v0.3.1  Renamed Regex -> RegexOp for IPLC compatibility; other people might that
 #   #NOTE:  Note by author
 
 __revision__ = "$Id$"
-__author__ = 'Ansel Halliburton (anseljh at users dot sourceforge dot net)'
-#__date__ = '$RevisionDate$'.split()[1].replace('/', '-')
-__version__ = '$Revision: 7 $'
+__author__ = 'Ansel Halliburton (github at anseljh dot com)'
 __release__ = (0,3,1,'alpha',0)
 
 PYPLE_TAGLINE = "PyPLE (say \"pipple\") -- the Python Persistent Logic Engine"
