@@ -1,0 +1,106 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml" xml:lang="en" lang="en">
+<head>
+    <title>PyPLE</title>
+    <style type="text/css">
+      .code {
+        background-color: #ddd;
+        margin-left: 2em;
+        margin-right: 2em;
+        border: 1px solid #777;
+      }
+    </style>
+</head>
+<body>
+    <h1>PyPLE</h1>
+    <p>PyPLE (pronounced "pipple") is the Python Persistent Logic Engine&mdash;a framework for composing, evaluating, and storing logical expressions.  With PyPLE, you can compose complex chains of simple logical operators and store them in a database.  You can then apply those chains of logic to any data you like.</p>
+    <p>PyPLE now uses <a href="http://www.sqlobject.org/">SQLObject</a> for database connectivity and object-relational mapping.  If you are a Python developer and don't know about SQLObject, check it out!</p>
+    
+    <h2>Code Example</h2>
+    <div class="code">
+      <pre>
+  &gt;&gt;&gt; import pyple
+  &gt;&gt;&gt; import yaml # use PyYAML for loading DB connection parameters
+  &gt;&gt;&gt; 
+  &gt;&gt;&gt; E = pyple.Engine() # instantiate a PyPLE engine
+  &gt;&gt;&gt; E.connect_to_db(pyple.Engine.build_db_uri(yaml.load(open('pyple-db.yaml').read()))) # Connect to the DB
+  Connecting to DB with: mysql://pyple:pyple@localhost:3306/pyple2?debug=1
+  Connected to DB: &lt;sqlobject.mysql.mysqlconnection.MySQLConnection instance at 0x11e5d50&gt;
+  &gt;&gt;&gt;
+  &gt;&gt;&gt; starts_with_foo = pyple.Regex(pattern="^foo")
+   1/QueryIns:  INSERT INTO operator (name, child_name) VALUES (NULL, 'Regex')
+   1/QueryOne:  SELECT name, child_name FROM operator WHERE id = (1)
+   1/QueryIns:  INSERT INTO op_regex (id, pattern, child_name, case_sensitive) VALUES (1, '^foo', NULL, 0)
+   1/QueryOne:  SELECT pattern, case_sensitive, child_name FROM op_regex WHERE id = (1)
+  &gt;&gt;&gt; starts_with_foo.eval("foo bar!")
+  True
+  &gt;&gt;&gt; starts_with_foo.eval("bar foo!")
+  False
+  &gt;&gt;&gt; 
+  &gt;&gt;&gt; always_true = pyple.AlwaysTrueOp()
+   1/QueryIns:  INSERT INTO operator (name, child_name) VALUES (NULL, 'AlwaysTrueOp')
+   1/QueryOne:  SELECT name, child_name FROM operator WHERE id = (2)
+   1/QueryIns:  INSERT INTO always_true_op (id, child_name) VALUES (2, NULL)
+   1/QueryOne:  SELECT child_name FROM always_true_op WHERE id = (2)
+  &gt;&gt;&gt;
+  &gt;&gt;&gt; always_false = pyple.AlwaysFalseOp()
+   1/QueryIns:  INSERT INTO operator (name, child_name) VALUES (NULL, 'AlwaysFalseOp')
+   1/QueryOne:  SELECT name, child_name FROM operator WHERE id = (3)
+   1/QueryIns:  INSERT INTO always_false_op (id, child_name) VALUES (3, NULL)
+   1/QueryOne:  SELECT child_name FROM always_false_op WHERE id = (3)
+  &gt;&gt;&gt; 
+  &gt;&gt;&gt; false_and_starts_with_foo = pyple.AND()
+   1/QueryIns:  INSERT INTO operator (name, child_name) VALUES (NULL, 'AND')
+   1/QueryOne:  SELECT name, child_name FROM operator WHERE id = (4)
+   1/QueryIns:  INSERT INTO op_and (id, child_name) VALUES (4, NULL)
+   1/QueryOne:  SELECT child_name FROM op_and WHERE id = (4)
+  &gt;&gt;&gt; 
+  &gt;&gt;&gt; false_and_starts_with_foo.addParameter(always_false)
+   1/Query   :  INSERT INTO operator_operator (parameter_id, operator_id) VALUES (4, 3)
+  &gt;&gt;&gt; 
+  &gt;&gt;&gt; false_and_starts_with_foo.addParameter(starts_with_foo)
+   1/Query   :  INSERT INTO operator_operator (parameter_id, operator_id) VALUES (4, 1)
+  &gt;&gt;&gt; 
+  &gt;&gt;&gt; false_and_starts_with_foo.eval('foo bar blah blah')
+   1/QueryAll:  SELECT operator_id FROM operator_operator WHERE parameter_id = (4)
+  False
+  &gt;&gt;&gt; 
+  &gt;&gt;&gt; test_or = pyple.OR()
+   1/QueryIns:  INSERT INTO operator (name, child_name) VALUES (NULL, 'OR')
+   1/QueryOne:  SELECT name, child_name FROM operator WHERE id = (5)
+   1/QueryIns:  INSERT INTO op_or (id, child_name) VALUES (5, NULL)
+   1/QueryOne:  SELECT child_name FROM op_or WHERE id = (5)
+  &gt;&gt;&gt;
+  &gt;&gt;&gt; test_or.addParameter(false_and_starts_with_foo)
+   1/Query   :  INSERT INTO operator_operator (parameter_id, operator_id) VALUES (5, 4)
+  &gt;&gt;&gt;
+  &gt;&gt;&gt; test_or.addParameter(always_true) 
+   1/Query   :  INSERT INTO operator_operator (parameter_id, operator_id) VALUES (5, 2)
+  &gt;&gt;&gt; 
+  &gt;&gt;&gt; test_or.eval('foo.. spam??')   
+   1/QueryAll:  SELECT operator_id FROM operator_operator WHERE parameter_id = (5)
+   1/QueryAll:  SELECT operator_id FROM operator_operator WHERE parameter_id = (4)
+  &gt;&gt;&gt;
+  &gt;&gt;&gt; test_or.eval('this does not start with foo')
+   1/QueryAll:  SELECT operator_id FROM operator_operator WHERE parameter_id = (5)
+   1/QueryAll:  SELECT operator_id FROM operator_operator WHERE parameter_id = (4)
+  True
+  &gt;&gt;&gt;
+      </pre>
+    </div>
+    
+    <h2>Links</h2>
+    <ul>
+      <li><a href="http://sourceforge.net/projects/pyple">SourceForge project page</a></li>
+      <li><a href="http://svn.sourceforge.net/viewcvs.cgi/pyple/">Browse Subversion code repository</a></li>
+      <li><a href="http://cia.navi.cx/stats/project/pyple">Stats on CIA</a></li>
+      <li><a href="http://python.org/pypi/PyPLE/">Info in Python Cheese Shop</a></li>
+      <li><a href="http://www.sqlobject.org/">SQLObject</a></li>
+      <li><a href="mailto:anseljh at users dot sourceforge dot net">Email Ansel Halliburton</a>, the founder/maintainer/everything</li>
+    </ul>
+    
+    <p><a href="http://sourceforge.net/donate/index.php?group_id=164858"><img src="http://images.sourceforge.net/images/project-support.jpg" width="88" height="32" style="border:none;" alt="Support This Project" /></a><a href="http://sourceforge.net"><img src="http://sflogo.sourceforge.net/sflogo.php?group_id=164858&amp;type=1" width="88" height="31" style="border:none;" alt="SourceForge.net Logo" /></a></p>
+    
+</body>
+</html>
