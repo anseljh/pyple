@@ -7,6 +7,8 @@ setup.py: Distutils script
 Copyright (C) 2006-2007 Ansel Halliburton.
 All rights reserved.
 
+BSD License:
+
 Redistribution and use in source and binary forms, with or without modification,
 are permitted provided that the following conditions are met:
     * Redistributions of source code must retain the above copyright notice,
@@ -35,12 +37,12 @@ from setuptools import setup, find_packages
 
 setup(
   name='pyple',
-  version='0.3.0',
+  version='0.3.1',
   description='PyPLE (pronounced "pipple") is the Python Persistent Logic Engine -- a framework for composing, evaluating, and storing logical expressions.',
   author='Ansel Halliburton',
-  author_email='anseljh@users.sourceforge.net',
+  author_email='github@anseljh.com',
   keywords=['logic','engine','expression','database'],
-  url='http://pyple.sourceforge.net/',
+  url='https://github.com/anseljh/pyple',
   license='BSD License',
   classifiers=['Development Status :: 2 - Pre-Alpha', 'Intended Audience :: Developers', 'License :: OSI Approved :: BSD License', 'Operating System :: OS Independent', 'Programming Language :: Python', 'Topic :: Software Development :: Libraries :: Python Modules'],
   py_modules=['pyple'],
